@@ -1,0 +1,77 @@
+# ==========================
+# Python
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Arquivos de configuração do Python
+.python-version
+
+# ==========================
+# IDEs e editores
+# ==========================
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# ==========================
+# Logs
+# ==========================
+*.log
+
+# ==========================
+# Testes
+# ==========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==========================
+# Cache
+# ==========================
+.cache/
+.mypy_cache/
+
+# ==========================
+# Jupyter (caso use futuramente)
+# ==========================
+.ipynb_checkpoints/
+
+# ==========================
+# Arquivos temporários
+# ==========================
+*.tmp
+*.temp
+
+# ==========================
+# Dados gerados pelo projeto
+# ==========================
+data/maps/*.graphml
+data/maps/*.osm
+data/maps/*.geojson
+
+# Mapas HTML gerados pelo Folium
+*.html
+
+# ==========================
+# Distribuição
+# ==========================
+build/
+dist/
+*.egg-info/
+
+# ==========================
+# Variáveis de ambiente
+# ==========================
+.env
