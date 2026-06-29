@@ -1,4 +1,5 @@
 from graph.map_loader import MapLoader
+from graph.graph_info import GraphInfo
 
 
 def main():
@@ -9,10 +10,15 @@ def main():
         "Copacabana, Rio de Janeiro, Brazil"
     )
 
-    print("\n===== Estatísticas =====")
+    info = GraphInfo(graph)
 
-    print(f"Nós: {len(graph.nodes)}")
-    print(f"Arestas: {len(graph.edges)}")
+    info.summary()
+
+    info.show_first_node()
+
+    info.show_neighbors()
+
+    info.show_edge_attributes()
 
 
 if __name__ == "__main__":
