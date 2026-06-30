@@ -4,6 +4,7 @@ from graph.graph_manager import GraphManager
 
 from algorithms.bfs import BFS
 from algorithms.dijkstra import Dijkstra
+from algorithms.astar import AStar
 
 from visualization.route_visualizer import RouteVisualizer
 
@@ -86,10 +87,8 @@ def main():
     print("\nCaminho encontrado:")
 
     if bfs_result.path:
-
         for i, node in enumerate(bfs_result.path, start=1):
             print(f"{i:02d} -> {node}")
-
     else:
         print("Nenhum caminho encontrado.")
 
@@ -114,10 +113,34 @@ def main():
     print("\nCaminho encontrado:")
 
     if dijkstra_result.path:
-
         for i, node in enumerate(dijkstra_result.path, start=1):
             print(f"{i:02d} -> {node}")
+    else:
+        print("Nenhum caminho encontrado.")
 
+    # ======================================================
+    # A*
+    # ======================================================
+
+    astar = AStar(manager)
+
+    astar_result = astar.search(start, goal)
+
+    print("\n" + "=" * 50)
+    print("RESULTADO DO A*")
+    print("=" * 50)
+
+    print(f"Origem          : {start}")
+    print(f"Destino         : {goal}")
+    print(f"Nós visitados   : {astar_result.visited_nodes}")
+    print(f"Distância       : {astar_result.path_cost:.2f} metros")
+    print(f"Tempo           : {astar_result.execution_time:.6f} s")
+
+    print("\nCaminho encontrado:")
+
+    if astar_result.path:
+        for i, node in enumerate(astar_result.path, start=1):
+            print(f"{i:02d} -> {node}")
     else:
         print("Nenhum caminho encontrado.")
 
@@ -137,6 +160,12 @@ def main():
         dijkstra_result.path,
         file_name="dijkstra_route.html",
         color="red"
+    )
+
+    visualizer.draw_route(
+        astar_result.path,
+        file_name="astar_route.html",
+        color="green"
     )
 
 
