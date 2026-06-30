@@ -1,5 +1,6 @@
-from graph.graph_manager import GraphManager
 from abc import ABC, abstractmethod
+from graph.graph_manager import GraphManager
+
 
 class SearchAlgorithm(ABC):
 
@@ -9,3 +10,25 @@ class SearchAlgorithm(ABC):
     @abstractmethod
     def search(self, start: int, goal: int):
         pass
+
+    def _reconstruct_path(
+        self,
+        parents: dict[int, int],
+        start: int,
+        goal: int
+    ) -> list[int]:
+
+        if start == goal:
+            return [start]
+
+        if goal not in parents:
+            return []
+
+        path = [goal]
+
+        while path[-1] != start:
+            path.append(parents[path[-1]])
+
+        path.reverse()
+
+        return path

@@ -3,18 +3,27 @@ from graph.graph_info import GraphInfo
 from graph.graph_manager import GraphManager
 
 from algorithms.bfs import BFS
+from algorithms.dijkstra import Dijkstra
+
+from visualization.route_visualizer import RouteVisualizer
 
 
 def main():
 
+    # ======================================================
     # Carrega o mapa
+    # ======================================================
+
     loader = MapLoader()
 
     graph = loader.load_city(
         "Copacabana, Rio de Janeiro, Brazil"
     )
 
-    # Exibe informações do grafo
+    # ======================================================
+    # Informações do grafo
+    # ======================================================
+
     info = GraphInfo(graph)
 
     info.summary()
@@ -22,10 +31,12 @@ def main():
     info.show_neighbors()
     info.show_edge_attributes()
 
-    # Cria o GraphManager
+    # ======================================================
+    # GraphManager
+    # ======================================================
+
     manager = GraphManager(graph)
 
-    # Teste do GraphManager
     node = manager.get_nodes()[0]
 
     print("\n" + "=" * 50)
@@ -46,7 +57,7 @@ def main():
         )
 
     # ======================================================
-    # Teste do BFS
+    # Nós de origem e destino
     # ======================================================
 
     nodes = manager.get_nodes()
@@ -54,9 +65,13 @@ def main():
     start = nodes[0]
     goal = nodes[50]
 
+    # ======================================================
+    # BFS
+    # ======================================================
+
     bfs = BFS(manager)
 
-    result = bfs.search(start, goal)
+    bfs_result = bfs.search(start, goal)
 
     print("\n" + "=" * 50)
     print("RESULTADO DO BFS")
@@ -64,19 +79,65 @@ def main():
 
     print(f"Origem          : {start}")
     print(f"Destino         : {goal}")
-    print(f"Nós visitados   : {result.visited_nodes}")
-    print(f"Custo           : {result.path_cost}")
-    print(f"Tempo           : {result.execution_time:.6f} s")
+    print(f"Nós visitados   : {bfs_result.visited_nodes}")
+    print(f"Custo           : {bfs_result.path_cost}")
+    print(f"Tempo           : {bfs_result.execution_time:.6f} s")
 
     print("\nCaminho encontrado:")
 
-    if result.path:
+    if bfs_result.path:
 
-        for i, node in enumerate(result.path, start=1):
+        for i, node in enumerate(bfs_result.path, start=1):
             print(f"{i:02d} -> {node}")
 
     else:
         print("Nenhum caminho encontrado.")
+
+    # ======================================================
+    # Dijkstra
+    # ======================================================
+
+    dijkstra = Dijkstra(manager)
+
+    dijkstra_result = dijkstra.search(start, goal)
+
+    print("\n" + "=" * 50)
+    print("RESULTADO DO DIJKSTRA")
+    print("=" * 50)
+
+    print(f"Origem          : {start}")
+    print(f"Destino         : {goal}")
+    print(f"Nós visitados   : {dijkstra_result.visited_nodes}")
+    print(f"Distância       : {dijkstra_result.path_cost:.2f} metros")
+    print(f"Tempo           : {dijkstra_result.execution_time:.6f} s")
+
+    print("\nCaminho encontrado:")
+
+    if dijkstra_result.path:
+
+        for i, node in enumerate(dijkstra_result.path, start=1):
+            print(f"{i:02d} -> {node}")
+
+    else:
+        print("Nenhum caminho encontrado.")
+
+    # ======================================================
+    # Visualização das rotas
+    # ======================================================
+
+    visualizer = RouteVisualizer(graph)
+
+    visualizer.draw_route(
+        bfs_result.path,
+        file_name="bfs_route.html",
+        color="blue"
+    )
+
+    visualizer.draw_route(
+        dijkstra_result.path,
+        file_name="dijkstra_route.html",
+        color="red"
+    )
 
 
 if __name__ == "__main__":
