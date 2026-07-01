@@ -1,15 +1,16 @@
 from graph.map_loader import MapLoader
 from graph.graph_info import GraphInfo
 from graph.graph_manager import GraphManager
-
+from hospitals.hospital_manager import HospitalManager
 from algorithms.bfs import BFS
 from algorithms.dijkstra import Dijkstra
 from algorithms.astar import AStar
-
 from visualization.route_visualizer import RouteVisualizer
 
 
 def main():
+
+    city = "Copacabana, Rio de Janeiro, Brazil"
 
     # ======================================================
     # Carrega o mapa
@@ -17,9 +18,7 @@ def main():
 
     loader = MapLoader()
 
-    graph = loader.load_city(
-        "Copacabana, Rio de Janeiro, Brazil"
-    )
+    graph = loader.load_city(city)
 
     # ======================================================
     # Informações do grafo
@@ -58,6 +57,19 @@ def main():
         )
 
     # ======================================================
+    # Hospitais
+    # ======================================================
+
+    hospital_manager = HospitalManager(
+        graph,
+        city
+    )
+
+    hospital_manager.load_hospitals()
+
+    hospital_manager.show_hospitals()
+
+    # ======================================================
     # Nós de origem e destino
     # ======================================================
 
@@ -87,8 +99,13 @@ def main():
     print("\nCaminho encontrado:")
 
     if bfs_result.path:
-        for i, node in enumerate(bfs_result.path, start=1):
+
+        for i, node in enumerate(
+            bfs_result.path,
+            start=1
+        ):
             print(f"{i:02d} -> {node}")
+
     else:
         print("Nenhum caminho encontrado.")
 
@@ -98,7 +115,10 @@ def main():
 
     dijkstra = Dijkstra(manager)
 
-    dijkstra_result = dijkstra.search(start, goal)
+    dijkstra_result = dijkstra.search(
+        start,
+        goal
+    )
 
     print("\n" + "=" * 50)
     print("RESULTADO DO DIJKSTRA")
@@ -113,8 +133,13 @@ def main():
     print("\nCaminho encontrado:")
 
     if dijkstra_result.path:
-        for i, node in enumerate(dijkstra_result.path, start=1):
+
+        for i, node in enumerate(
+            dijkstra_result.path,
+            start=1
+        ):
             print(f"{i:02d} -> {node}")
+
     else:
         print("Nenhum caminho encontrado.")
 
@@ -124,7 +149,10 @@ def main():
 
     astar = AStar(manager)
 
-    astar_result = astar.search(start, goal)
+    astar_result = astar.search(
+        start,
+        goal
+    )
 
     print("\n" + "=" * 50)
     print("RESULTADO DO A*")
@@ -139,8 +167,13 @@ def main():
     print("\nCaminho encontrado:")
 
     if astar_result.path:
-        for i, node in enumerate(astar_result.path, start=1):
+
+        for i, node in enumerate(
+            astar_result.path,
+            start=1
+        ):
             print(f"{i:02d} -> {node}")
+
     else:
         print("Nenhum caminho encontrado.")
 
