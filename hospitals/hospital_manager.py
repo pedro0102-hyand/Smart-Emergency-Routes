@@ -1,37 +1,40 @@
 import osmnx as ox
 from hospitals.hospital import Hospital
-
 class HospitalManager:
 
     def __init__(
         self,
         graph,
-        place_name: str
+        city
     ):
 
         self.graph = graph
-        self.place_name = place_name
-
+        self.city = city
         self.hospitals = []
 
-    def load_hospitals(self):
+    # =====================================================
+    # Carrega hospitais do OpenStreetMap
+    # =====================================================
 
-        """
-        Busca hospitais no OpenStreetMap.
-        """
+    def load_hospitals(self):
 
         tags = {
             "amenity": "hospital"
         }
 
-        gdf = ox.features_from_place(
-            self.place_name,
+        hospitals = ox.features_from_place(
+            self.city,
             tags
         )
 
         self.hospitals.clear()
 
-        for _, row in gdf.iterrows():
+        for _, row in hospitals.iterrows():
+
+            name = row.get(
+                "name",
+                "Hospital sem nome"
+            )
 
             geometry = row.geometry
 
@@ -42,10 +45,10 @@ class HospitalManager:
 
             else:
 
-                centroid = geometry.centroid
+                point = geometry.centroid
 
-                latitude = centroid.y
-                longitude = centroid.x
+                latitude = point.y
+                longitude = point.x
 
             node = ox.distance.nearest_nodes(
                 self.graph,
@@ -53,23 +56,63 @@ class HospitalManager:
                 latitude
             )
 
-            name = row.get(
-                "name",
-                "Hospital sem nome"
+            self.hospitals.append(
+                Hospital(
+                    name=name,
+                    node_id=node,
+                    latitude=latitude,
+                    longitude=longitude
+                )
             )
 
-            hospital = Hospital(
-                name=name,
-                latitude=latitude,
-                longitude=longitude,
-                node_id=node
+        self._remove_duplicates()
+
+    # =====================================================
+    # Remove hospitais duplicados
+    # =====================================================
+
+    def _remove_duplicates(self):
+
+        unique_nodes = set()
+        unique_names = set()
+
+        filtered = []
+
+        for hospital in self.hospitals:
+
+            normalized_name = (
+                hospital.name
+                .strip()
+                .lower()
             )
 
-            self.hospitals.append(hospital)
+            if hospital.node_id in unique_nodes:
+                continue
 
-    def get_hospitals(self):
+            if normalized_name in unique_names:
+                continue
 
-        return self.hospitals
+            unique_nodes.add(
+                hospital.node_id
+            )
+
+            unique_names.add(
+                normalized_name
+            )
+
+            filtered.append(
+                hospital
+            )
+
+        filtered.sort(
+            key=lambda hospital: hospital.name
+        )
+
+        self.hospitals = filtered
+
+    # =====================================================
+    # Exibe hospitais
+    # =====================================================
 
     def show_hospitals(self):
 
@@ -81,16 +124,35 @@ class HospitalManager:
             f"Quantidade: {len(self.hospitals)}"
         )
 
-        for i, hospital in enumerate(
+        for index, hospital in enumerate(
             self.hospitals,
             start=1
         ):
 
             print("\n----------------------------")
-            print(f"Hospital {i}")
+            print(f"Hospital {index}")
             print("----------------------------")
 
             print(f"Nome      : {hospital.name}")
             print(f"Nó        : {hospital.node_id}")
             print(f"Latitude  : {hospital.latitude}")
             print(f"Longitude : {hospital.longitude}")
+
+    # =====================================================
+    # Retorna todos os hospitais
+    # =====================================================
+
+    def get_hospitals(self):
+
+        return self.hospitals
+
+    # =====================================================
+    # Retorna um hospital pelo índice
+    # =====================================================
+
+    def get_hospital(
+        self,
+        index
+    ):
+
+        return self.hospitals[index]
