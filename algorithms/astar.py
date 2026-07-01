@@ -3,8 +3,6 @@ import math
 import time
 from algorithms.search_algorithm import SearchAlgorithm
 from algorithms.search_result import SearchResult
-
-
 class AStar(SearchAlgorithm):
 
     def heuristic(
@@ -12,15 +10,40 @@ class AStar(SearchAlgorithm):
         node: int,
         goal: int
     ) -> float:
-       
+        """
+        Calcula a distância geográfica (Haversine)
+        entre dois nós do grafo.
 
-        y1, x1 = self.graph_manager.get_coordinates(node)
-        y2, x2 = self.graph_manager.get_coordinates(goal)
+        Retorna a distância em metros.
+        """
 
-        return math.sqrt(
-            (x2 - x1) ** 2 +
-            (y2 - y1) ** 2
+        lat1, lon1 = self.graph_manager.get_coordinates(node)
+        lat2, lon2 = self.graph_manager.get_coordinates(goal)
+
+        lat1 = math.radians(lat1)
+        lon1 = math.radians(lon1)
+
+        lat2 = math.radians(lat2)
+        lon2 = math.radians(lon2)
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1)
+            * math.cos(lat2)
+            * math.sin(dlon / 2) ** 2
         )
+
+        c = 2 * math.atan2(
+            math.sqrt(a),
+            math.sqrt(1 - a)
+        )
+
+        raio_terra = 6_371_000  # metros
+
+        return raio_terra * c
 
     def search(
         self,
@@ -30,10 +53,10 @@ class AStar(SearchAlgorithm):
 
         start_time = time.perf_counter()
 
-        queue = []
+        priority_queue = []
 
         heapq.heappush(
-            queue,
+            priority_queue,
             (
                 0,
                 start
@@ -41,7 +64,7 @@ class AStar(SearchAlgorithm):
         )
 
         g_score = {
-            start: 0
+            start: 0.0
         }
 
         parents = {}
@@ -50,9 +73,9 @@ class AStar(SearchAlgorithm):
 
         visited_nodes = 0
 
-        while queue:
+        while priority_queue:
 
-            _, current = heapq.heappop(queue)
+            _, current = heapq.heappop(priority_queue)
 
             if current in visited:
                 continue
@@ -66,40 +89,45 @@ class AStar(SearchAlgorithm):
 
             for neighbor in self.graph_manager.get_neighbors(current):
 
-                edge = self.graph_manager.get_edge_length(
+                edge_cost = self.graph_manager.get_edge_length(
                     current,
                     neighbor
                 )
 
-                tentative = g_score[current] + edge
+                tentative_g = (
+                    g_score[current]
+                    + edge_cost
+                )
 
                 if (
                     neighbor not in g_score
-                    or
-                    tentative < g_score[neighbor]
+                    or tentative_g < g_score[neighbor]
                 ):
 
-                    g_score[neighbor] = tentative
+                    g_score[neighbor] = tentative_g
 
                     parents[neighbor] = current
 
-                    priority = (
-                        tentative +
-                        self.heuristic(
+                    f_score = (
+                        tentative_g
+                        + self.heuristic(
                             neighbor,
                             goal
                         )
                     )
 
                     heapq.heappush(
-                        queue,
+                        priority_queue,
                         (
-                            priority,
+                            f_score,
                             neighbor
                         )
                     )
 
-        execution_time = time.perf_counter() - start_time
+        execution_time = (
+            time.perf_counter()
+            - start_time
+        )
 
         path = self._reconstruct_path(
             parents,
@@ -110,6 +138,6 @@ class AStar(SearchAlgorithm):
         return SearchResult(
             path=path,
             visited_nodes=visited_nodes,
-            path_cost=g_score.get(goal, 0),
+            path_cost=g_score.get(goal, 0.0),
             execution_time=execution_time
         )
