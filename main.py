@@ -1,10 +1,15 @@
 from graph.map_loader import MapLoader
 from graph.graph_info import GraphInfo
 from graph.graph_manager import GraphManager
+
 from hospitals.hospital_manager import HospitalManager
+
 from algorithms.bfs import BFS
 from algorithms.dijkstra import Dijkstra
 from algorithms.astar import AStar
+
+from routing.hospital_router import HospitalRouter
+
 from visualization.route_visualizer import RouteVisualizer
 
 
@@ -51,14 +56,12 @@ def main():
     print(f"Vizinhos: {neighbors}")
 
     if neighbors:
+
         print(
             f"Comprimento da aresta: "
             f"{manager.get_edge_length(node, neighbors[0]):.2f} m"
         )
 
-    # ======================================================
-    # Hospitais
-    # ======================================================
 
     hospital_manager = HospitalManager(
         graph,
@@ -69,22 +72,17 @@ def main():
 
     hospital_manager.show_hospitals()
 
-    # ======================================================
-    # Nós de origem e destino
-    # ======================================================
-
     nodes = manager.get_nodes()
 
     start = nodes[0]
     goal = nodes[50]
 
-    # ======================================================
-    # BFS
-    # ======================================================
-
     bfs = BFS(manager)
 
-    bfs_result = bfs.search(start, goal)
+    bfs_result = bfs.search(
+        start,
+        goal
+    )
 
     print("\n" + "=" * 50)
     print("RESULTADO DO BFS")
@@ -107,11 +105,9 @@ def main():
             print(f"{i:02d} -> {node}")
 
     else:
+
         print("Nenhum caminho encontrado.")
 
-    # ======================================================
-    # Dijkstra
-    # ======================================================
 
     dijkstra = Dijkstra(manager)
 
@@ -141,11 +137,9 @@ def main():
             print(f"{i:02d} -> {node}")
 
     else:
+
         print("Nenhum caminho encontrado.")
 
-    # ======================================================
-    # A*
-    # ======================================================
 
     astar = AStar(manager)
 
@@ -175,11 +169,42 @@ def main():
             print(f"{i:02d} -> {node}")
 
     else:
+
         print("Nenhum caminho encontrado.")
 
-    # ======================================================
-    # Visualização das rotas
-    # ======================================================
+    router = HospitalRouter(
+        manager,
+        hospital_manager
+    )
+
+    best_hospital, best_route = router.find_best_hospital(
+        start
+    )
+
+    print("\n" + "=" * 50)
+    print("MELHOR HOSPITAL")
+    print("=" * 50)
+
+    if best_hospital is not None:
+
+        print(f"Nome       : {best_hospital.name}")
+        print(f"Nó         : {best_hospital.node_id}")
+        print(f"Distância  : {best_route.path_cost:.2f} metros")
+        print(f"Nós vistos : {best_route.visited_nodes}")
+        print(f"Tempo      : {best_route.execution_time:.6f} s")
+
+        print("\nCaminho:")
+
+        for i, node in enumerate(
+            best_route.path,
+            start=1
+        ):
+            print(f"{i:02d} -> {node}")
+
+    else:
+
+        print("Nenhum hospital acessível foi encontrado.")
+
 
     visualizer = RouteVisualizer(graph)
 
@@ -200,6 +225,14 @@ def main():
         file_name="astar_route.html",
         color="green"
     )
+
+    if best_route is not None and best_route.path:
+
+        visualizer.draw_route(
+            best_route.path,
+            file_name="best_hospital_route.html",
+            color="purple"
+        )
 
 
 if __name__ == "__main__":
